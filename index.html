@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VOICE COIN — Post your voice instantly</title>
+  <meta name="description" content="VOICE COIN — Post your voice message and everyone can hear it instantly. On‑chain style social audio wall." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="images/favicon.png" />
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --primary-light: #34d399;
+      --accent: #fbbf24;
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #111111;
+      --bg-tertiary: #1a1a1a;
+      --text-primary: #ffffff;
+      --text-secondary: #a3a3a3;
+      --text-muted: #525252;
+      --border: #262626;
+      --border-light: #404040;
+      --card: #141414;
+      --gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    .bg-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: 
+      radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(251, 191, 36, 0.15) 0%, transparent 50%);
+    }
+    .bg-grid { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.02; background-image: 
+      linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+      background-size: 50px 50px; }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* Header */
+    .header { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(20px) saturate(180%); background: rgba(10, 10, 10, 0.8); border-bottom: 1px solid var(--border); }
+    .header-content { display: flex; align-items: center; justify-content: space-between; height: 4.5rem; }
+    .logo { display: flex; align-items: center; gap: 1rem; font-weight: 900; font-size: 1.5rem; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .logo-image { height: 2.5rem; width: auto; border-radius: 0.75rem; box-shadow: var(--shadow-lg); animation: float 3s ease-in-out infinite; object-fit: contain; display: block; }
+    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+    .nav-items { display: flex; align-items: center; gap: 1rem; margin-left: auto; justify-content: flex-end; }
+    @media (min-width: 768px) {
+      .nav-items { gap: 0.75rem; }
+    }
+    .btn-buy { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 9999px; background: var(--gradient); color: var(--bg-primary); font-weight: 700; font-size: 0.85rem; text-decoration: none; box-shadow: var(--shadow-lg); transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-buy:hover { transform: translateY(-2px); box-shadow: var(--shadow-xl); }
+    .btn-twitter { display: inline-flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.12); background: #000000; box-shadow: var(--shadow); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+    .btn-twitter:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--primary); background: #0f172a; }
+    .twitter-icon { width: 1.4rem; height: 1.4rem; object-fit: cover; border-radius: 50%; }
+    .nav-link { color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.2s; font-size: 0.9rem; }
+    .nav-link:hover { color: var(--text-primary); }
+    .beta-badge { background: var(--accent); color: var(--bg-primary); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Hero */
+    .hero { padding: 4rem 0 6rem; text-align: center; position: relative; }
+    .hero-content { max-width: 900px; margin: 0 auto; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: var(--primary-light); padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; margin-bottom: 2rem; }
+    .hero-title { font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; background: linear-gradient(135deg, #ffffff 0%, #a3a3a3 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-subtitle { font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .hero-cta { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+    .contract-pill { display: inline-flex; align-items: center; gap: 0.75rem; margin-top: 1.5rem; padding: 0.75rem 1rem; border-radius: 9999px; border: 1px solid rgba(16, 185, 129, 0.25); background: rgba(16, 185, 129, 0.08); color: var(--primary-light); font-size: 0.85rem; backdrop-filter: blur(8px); }
+    .contract-label { text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; font-size: 0.75rem; color: var(--primary-light); }
+    .contract-value { font-family: 'SF Mono', Monaco, monospace; color: var(--text-primary); font-size: 0.85rem; }
+    .copy-btn { padding: 0.4rem 0.9rem; border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.04); color: var(--text-primary); font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    .copy-btn:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--primary); color: var(--primary-light); }
+
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 1.5rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: all 0.2s; cursor: pointer; border: none; position: relative; overflow: hidden; }
+    .btn-primary { background: var(--gradient); color: var(--bg-primary); box-shadow: var(--shadow-lg); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-xl); }
+    .btn-secondary { background: rgba(255, 255, 255, 0.05); color: var(--text-primary); border: 1px solid var(--border-light); backdrop-filter: blur(10px); }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--primary); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Main Grid */
+    .main { padding: 0 0 4rem; }
+    .grid { display: grid; gap: 2rem; grid-template-columns: 1fr; }
+    @media (min-width: 1200px) { .grid { grid-template-columns: 420px 1fr; } }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 1.25rem; box-shadow: var(--shadow); backdrop-filter: blur(20px); overflow: hidden; }
+    .card-header { padding: 1.5rem 1.5rem 0; border-bottom: 1px solid var(--border); }
+    .card-content { padding: 1.5rem; }
+    .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+
+    /* Recording Panel */
+    .recording-panel { position: sticky; top: 5.5rem; }
+    .form-group { margin-bottom: 1.5rem; }
+    .label { display: block; font-size: 0.875rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; }
+    .input, .textarea { width: 100%; padding: 0.875rem 1rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 0.75rem; color: var(--text-primary); font-size: 0.9rem; transition: all 0.2s; }
+    .input:focus, .textarea:focus { outline: none; border-color: var(--primary); background: var(--bg-tertiary); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+    .input::placeholder, .textarea::placeholder { color: var(--text-muted); }
+    .textarea { resize: vertical; min-height: 4rem; }
+    .controls { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .recording-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--text-muted); transition: all 0.3s; }
+    .recording-dot.recording { background: #ef4444; animation: pulse 1s infinite; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2); }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.1); } }
+    .timer { font-family: 'SF Mono', Monaco, monospace; background: var(--bg-secondary); padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 600; border: 1px solid var(--border); color: var(--primary); }
+    .preview-section { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1rem; margin-top: 1rem; }
+    .preview-section audio { width: 100%; margin-bottom: 1rem; }
+    .hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+    /* Feed */
+    .feed-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .post-count { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--text-secondary); background: var(--bg-secondary); padding: 0.5rem 1rem; border-radius: 9999px; border: 1px solid var(--border); }
+    .live-indicator { width: 0.5rem; height: 0.5rem; background: var(--primary); border-radius: 50%; animation: pulse 2s infinite; }
+    .feed-list { display: flex; flex-direction: column; gap: 1rem; }
+    .post-item { display: flex; gap: 1rem; padding: 1.5rem; background: var(--card); border: 1px solid var(--border); border-radius: 1rem; transition: all 0.2s; position: relative; overflow: hidden; }
+    .post-item::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, transparent 50%); opacity: 0; transition: opacity 0.2s; }
+    .post-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--border-light); }
+    .post-item:hover::before { opacity: 1; }
+    .avatar { width: 3rem; height: 3rem; background: var(--gradient); color: var(--bg-primary); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0; box-shadow: var(--shadow); }
+    .post-content { flex: 1; min-width: 0; }
+    .post-meta { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .username { font-weight: 700; color: var(--text-primary); }
+    .timestamp { color: var(--text-muted); font-size: 0.875rem; }
+    .post-caption { color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5; }
+    .post-audio { width: 100%; border-radius: 0.5rem; }
+    .empty-state { text-align: center; padding: 4rem 1rem; color: var(--text-muted); }
+    .empty-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+
+    /* Footer */
+    .footer { margin-top: 4rem; padding: 2rem 0; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 0.875rem; }
+    .footer a { color: var(--primary); text-decoration: none; font-weight: 600; transition: color 0.2s; }
+    .footer a:hover { color: var(--primary-light); }
+
+    /* Overlay */
+    .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
+    .overlay-content { background: var(--card); border: 1px solid var(--border); padding: 2rem; border-radius: 1rem; max-width: 32rem; width: 100%; box-shadow: var(--shadow-xl); }
+    .overlay h3 { margin-bottom: 1rem; font-size: 1.5rem; font-weight: 800; }
+    .overlay ol { margin: 1.5rem 0; padding-left: 1.5rem; color: var(--text-secondary); }
+    .overlay li { margin: 0.75rem 0; line-height: 1.5; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container { padding: 0 1rem; }
+      .hero { padding: 2rem 0 3rem; }
+      .hero-cta { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
+      .controls { flex-direction: column; align-items: stretch; }
+      .post-item { padding: 1rem; }
+      .avatar { width: 2.5rem; height: 2.5rem; }
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+    ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+  </style>
+</head>
+<body>
+  <div class="bg-animation"></div>
+  <div class="bg-grid"></div>
+
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <a class="logo" href="#">
+          <img src="images\token logo.png" alt="Voice Coin logo" class="logo-image" />
+          <span>VOICE COIN</span>
+        </a>
+        <div class="nav-items">
+          <a href="https://x.com" target="_blank" rel="noopener" class="btn-twitter">
+            <img src="images/twitter.jpg" alt="Twitter" class="twitter-icon" />
+          </a>
+          <a href="https://pump.fun" target="_blank" rel="noopener" class="btn-buy">Buy Now</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+        <div class="hero-content">
+        <h1 class="hero-title">The Voice of the<br> <span style="background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Trenches</span></h1>
+        <p class="hero-subtitle">Share your voice messages instantly with the trenches. Each post is live, real, and forever part of the decentralized degen trenches.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary" onclick="document.querySelector('.recording-panel').scrollIntoView()">Start Recording</button>
+          <button class="btn btn-secondary" onclick="document.querySelector('.feed-list').scrollIntoView()">Listen to Voices</button>
+        </div>
+        <div class="contract-pill" id="contractPill">
+          <div>
+            <div class="contract-label">CA</div>
+            <div class="contract-value" id="contractValue">Coming soon</div>
+          </div>
+          <button class="copy-btn" id="copyCaBtn">Copy</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="main">
+    <div class="container">
+      <div class="grid">
+        <!-- Recording Panel -->
+        <aside class="recording-panel">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Record Voice Message</h2>
+            </div>
+            <div class="card-content">
+              <div class="form-group">
+                <label class="label" for="username">Your handle</label>
+                <input id="username" class="input" type="text" placeholder="anon, @yourname, or nickname" />
+              </div>
+              <div class="form-group">
+                <label class="label" for="caption">What's your take?</label>
+                <textarea id="caption" class="textarea" placeholder="Share your thoughts, opinion, or hot take..."></textarea>
+              </div>
+              <div class="controls">
+                <button class="btn btn-secondary" id="btnRecord">
+                  <span class="recording-dot" id="dot"></span>
+                  <span id="recLabel">Start Recording</span>
+                </button>
+                <button class="btn btn-secondary" id="btnStop" disabled>Stop</button>
+                <div class="timer" id="timer">00:00</div>
+              </div>
+              <div id="previewWrap" style="display:none">
+                <div class="preview-section">
+                  <audio id="preview" controls playsinline class="post-audio"></audio>
+                  <div class="controls">
+                    <button class="btn btn-primary" id="btnUpload">Post Voice</button>
+                    <button class="btn btn-secondary" id="btnDiscard">Discard</button>
+                  </div>
+                  <div class="hint">Your voice will be posted publicly. Keep it respectful!</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Feed -->
+        <section class="card">
+          <div class="card-header">
+            <div class="feed-header">
+              <h2 class="card-title">Live Voice Feed</h2>
+              <div class="post-count">
+                <span class="live-indicator"></span>
+                <span id="count">0 voices</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="feed-list" id="feed">
+              <div class="empty-state" id="empty">
+                <div class="empty-icon"></div>
+                <h3 style="margin-bottom: 0.5rem; color: var(--text-secondary);">No voices yet</h3>
+                <p>Be the first to share your voice with the world!</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Built with ❤️ for the trenches</p>
+    </div>
+  </footer>
+
+  <!-- Permission Overlay -->
+  <div class="overlay" id="overlay">
+    <div class="overlay-content">
+      <h3>🎤 Microphone Access Required</h3>
+      <p style="color: var(--text-secondary); margin-bottom: 1rem;">We need microphone access to record your voice. Here's how to enable it:</p>
+      <ol>
+        <li>Use <strong>HTTPS</strong> or <code>localhost</code> for secure access</li>
+        <li>Click "Allow" when prompted for microphone permission</li>
+        <li>On mobile Safari, tap the record button to activate</li>
+      </ol>
+      <div style="margin-top: 1.5rem;">
+        <button class="btn btn-primary" id="btnTryAgain">✨ Try Again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase + App (Integrated) -->
+  <script type="module">
+    // ===============================
+    // 1) Firebase SDK (v10 modular)
+    // ===============================
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
+    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs, startAfter, onSnapshot, getCountFromServer } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js';
+
+    // ✅ Replaced with your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5n1dtNGLCtPWKfX573QJrvK3BPL07yVg",
+      authDomain: "voice-9c738.firebaseapp.com",
+      projectId: "voice-9c738",
+      storageBucket: "voice-9c738.firebasestorage.app",
+      messagingSenderId: "963677311371",
+      appId: "1:963677311371:web:b5612ed67a8b15382b1f8e",
+      measurementId: "G-E3GGGKQ71B"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // ===============================
+    // 2) Simple Recorder
+    // ===============================
+    const recBtn = document.getElementById('btnRecord');
+    const stopBtn = document.getElementById('btnStop');
+    const uploadBtn = document.getElementById('btnUpload');
+    const discardBtn = document.getElementById('btnDiscard');
+    const dot = document.getElementById('dot');
+    const recLabel = document.getElementById('recLabel');
+    const timerEl = document.getElementById('timer');
+    const previewWrap = document.getElementById('previewWrap');
+    const preview = document.getElementById('preview');
+    const copyCaBtn = document.getElementById('copyCaBtn');
+    const contractValue = document.getElementById('contractValue');
+
+    const MAX_SECONDS = 30;
+
+    let mediaRecorder; let chunks = []; let timerInt; let seconds = 0; let blob;
+
+    function fmt(n){ return String(n).padStart(2, '0'); }
+    function tick(){
+      seconds++;
+      const m = Math.floor(seconds/60), s = seconds%60;
+      timerEl.textContent = `${fmt(m)}:${fmt(s)}`;
+      if (seconds >= MAX_SECONDS){
+        stopRecording(true);
+      }
+    }
+
+    async function startRecording(){
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : undefined;
+        mediaRecorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+        chunks = []; seconds = 0; timerEl.textContent = '00:00';
+        mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          blob = new Blob(chunks, { type: 'audio/webm' });
+          preview.src = URL.createObjectURL(blob);
+          previewWrap.style.display = 'block';
+        };
+        mediaRecorder.start();
+        timerInt = setInterval(tick, 1000);
+        dot.classList.add('live');
+        recLabel.textContent = 'Recording…';
+        recBtn.disabled = true; stopBtn.disabled = false;
+      } catch (err){
+        alert('Mic permission denied or unavailable.');
+        console.error(err);
+      }
+    }
+
+    function stopRecording(autoStop = false){
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach(t => t.stop());
+      clearInterval(timerInt); dot.classList.remove('live');
+      recLabel.textContent = 'Start recording';
+      recBtn.disabled = false; stopBtn.disabled = true;
+      if (autoStop){
+        alert('Recording stopped at the 30 second maximum.');
+      }
+    }
+
+    recBtn.addEventListener('click', startRecording);
+    stopBtn.addEventListener('click', () => stopRecording());
+
+    discardBtn?.addEventListener('click', () => {
+      previewWrap.style.display = 'none';
+      preview.src = ''; blob = null; chunks = []; seconds = 0; timerEl.textContent = '00:00';
+    });
+
+    copyCaBtn?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(contractValue.textContent.trim());
+        copyCaBtn.textContent = 'Copied!';
+        copyCaBtn.disabled = true;
+        setTimeout(() => {
+          copyCaBtn.textContent = 'Copy';
+          copyCaBtn.disabled = false;
+        }, 1200);
+      } catch (err) {
+        console.error('Failed to copy CA', err);
+      }
+    });
+
+    // ===============================
+    // 3) Upload to Storage + Firestore doc
+    // ===============================
+    async function postVoice(){
+      if (!blob) return alert('Record something first.');
+      uploadBtn.disabled = true; uploadBtn.textContent = 'Posting…';
+      try {
+        const user = (document.getElementById('username').value || 'anon').slice(0, 24);
+        const caption = (document.getElementById('caption').value || '').slice(0, 180);
+
+        // 3.1 create placeholder doc
+        const docRef = await addDoc(collection(db, 'voices'), {
+          user, caption,
+          createdAt: serverTimestamp(),
+          status: 'uploading'
+        });
+
+        // 3.2 upload file to storage
+        const fileRef = ref(storage, `voice_messages/${docRef.id}.webm`);
+        const snap = await uploadBytes(fileRef, blob, { contentType: 'audio/webm' });
+        const url = await getDownloadURL(snap.ref);
+
+        // 3.3 update doc with URL by adding a new doc (simple approach for no auth)
+        // Instead of update (requires security rules), we add a second doc entry "public" in feed.
+        await addDoc(collection(db, 'feed'), {
+          user, caption, url,
+          createdAt: serverTimestamp(),
+          bytes: blob.size || null,
+          type: 'voice'
+        });
+
+        // reset UI
+        previewWrap.style.display = 'none';
+        preview.src = '';
+        document.getElementById('caption').value = '';
+        uploadBtn.textContent = 'Posted!';
+        setTimeout(()=>{ uploadBtn.textContent = 'Post voice'; uploadBtn.disabled = false; }, 800);
+      } catch (e){
+        console.error(e);
+        alert('Upload failed. Check console.');
+        uploadBtn.disabled = false; uploadBtn.textContent = 'Post voice';
+      }
+    }
+
+    uploadBtn?.addEventListener('click', postVoice);
+
+    // ===============================
+    // 4) Live Feed (Firestore onSnapshot)
+    // ===============================
+    const feedEl = document.getElementById('feed');
+    const emptyEl = document.getElementById('empty');
+    const countEl = document.getElementById('count');
+    countEl.textContent = 'Total 0 posts';
+    const toast = document.createElement('div');
+    toast.className = 'pill';
+    toast.style.position = 'sticky';
+    toast.style.top = '16px';
+    toast.style.marginBottom = '12px';
+    toast.style.display = 'none';
+    toast.style.justifyContent = 'center';
+    toast.style.alignItems = 'center';
+    toast.style.padding = '10px 14px';
+    toast.style.cursor = 'pointer';
+    toast.style.background = 'rgba(255, 213, 79, 0.12)';
+    toast.style.borderColor = 'rgba(255, 213, 79, 0.3)';
+    toast.style.color = 'var(--accent)';
+    toast.style.fontWeight = '700';
+    toast.textContent = 'New posts available — click to refresh';
+    toast.id = 'newPostsToast';
+    toast.addEventListener('click', () => {
+      loadPage(1, { reset: true, jumpToTop: true });
+      toast.style.display = 'none';
+    });
+    feedEl.before(toast);
+    const paginationEl = document.createElement('div');
+    paginationEl.style.display = 'flex';
+    paginationEl.style.justifyContent = 'space-between';
+    paginationEl.style.alignItems = 'center';
+    paginationEl.style.margin = '12px 0 0';
+    paginationEl.innerHTML = `
+      <button class="btn" id="btnPrev" disabled>Prev</button>
+      <div class="tag" id="pageInfo">Page 1</div>
+      <button class="btn" id="btnNext" disabled>Next</button>
+    `;
+    feedEl.after(paginationEl);
+    const prevBtn = document.getElementById('btnPrev');
+    const nextBtn = document.getElementById('btnNext');
+    const pageInfo = document.getElementById('pageInfo');
+
+    function renderItem(doc){
+      const d = doc.data();
+      const li = document.createElement('div');
+      li.className = 'item';
+      li.innerHTML = `
+        <div>
+          <div class="meta"><span class="user">${escapeHtml(d.user||'anon')}</span><span>•</span><span>${timeago(d.createdAt?.toDate?.()||new Date())}</span></div>
+          ${d.caption?`<div class="caption">${escapeHtml(d.caption)}</div>`:''}
+          ${d.url?`<audio controls preload="none" src="${d.url}"></audio>`:''}
+        </div>
+      `;
+      return li;
+    }
+
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[s]));
+    }
+
+    function timeago(date){
+      const secs = Math.floor((Date.now() - date.getTime())/1000);
+      const mins = Math.floor(secs/60), hrs = Math.floor(mins/60), days = Math.floor(hrs/24);
+      if (secs < 60) return `${secs}s ago`;
+      if (mins < 60) return `${mins}m ago`;
+      if (hrs < 24) return `${hrs}h ago`;
+      return `${days}d ago`;
+    }
+
+    const PAGE_SIZE = 5;
+    let currentPage = 1;
+    const pageCursors = [null];
+    let loadingPage = false;
+    let realtimeUnsub = null;
+    let newestDocIdOnPageOne = null;
+    let totalCount = 0;
+
+    function renderFeedDocs(docs, page){
+      feedEl.innerHTML = '';
+      docs.forEach(doc => feedEl.appendChild(renderItem(doc)));
+      const count = docs.length;
+      emptyEl.style.display = count ? 'none' : 'block';
+      updateCountLabel();
+      currentPage = page;
+      pageInfo.textContent = `Page ${currentPage}`;
+      if (currentPage === 1){
+        prevBtn.style.visibility = 'hidden';
+        prevBtn.style.pointerEvents = 'none';
+        prevBtn.disabled = true;
+      } else {
+        prevBtn.style.visibility = '';
+        prevBtn.style.pointerEvents = '';
+        prevBtn.disabled = false;
+      }
+      if (page === 1){
+        if (count === PAGE_SIZE){
+          pageCursors[1] = docs[docs.length - 1];
+          nextBtn.disabled = false;
+        } else {
+          pageCursors[1] = null;
+          nextBtn.disabled = true;
+        }
+      } else {
+        nextBtn.disabled = count < PAGE_SIZE;
+      }
+    }
+
+    function teardownRealtime(){
+      if (realtimeUnsub){
+        realtimeUnsub();
+        realtimeUnsub = null;
+      }
+    }
+
+    function setupRealtime(){
+      if (realtimeUnsub) return;
+      const qRealtime = query(collection(db, 'feed'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE + 1));
+      realtimeUnsub = onSnapshot(qRealtime, (snap) => {
+        const docs = snap.docs.slice(0, PAGE_SIZE);
+        const newestId = docs[0]?.id || null;
+        const isFirstPage = currentPage === 1;
+        const hasNew = newestDocIdOnPageOne && newestId && newestId !== newestDocIdOnPageOne;
+        if (isFirstPage) {
+          renderFeedDocs(docs, 1);
+          updateTotalCount();
+          toast.style.display = 'none';
+        } else if (hasNew){
+          toast.style.display = 'flex';
+        }
+        newestDocIdOnPageOne = newestId;
+      }, (err) => {
+        console.error('Realtime feed failed', err);
+      });
+    }
+
+    async function loadPage(targetPage = 1, { reset = false, jumpToTop = false } = {}){
+      if (loadingPage) return;
+      loadingPage = true;
+      try {
+        if (reset){
+          pageCursors.length = 1;
+          pageCursors[0] = null;
+          newestDocIdOnPageOne = null;
+          teardownRealtime();
+        }
+
+        if (targetPage === 1){
+          setupRealtime();
+          if (jumpToTop){
+            feedEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          updateTotalCount();
+          loadingPage = false;
+          return;
+        }
+
+        teardownRealtime();
+
+        const cursor = pageCursors[targetPage - 1] || null;
+        let q = query(collection(db, 'feed'), orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+        if (cursor){
+          q = query(collection(db, 'feed'), orderBy('createdAt', 'desc'), startAfter(cursor), limit(PAGE_SIZE));
+        }
+
+        const snap = await getDocs(q);
+
+        if (snap.empty && targetPage > 1){
+          pageCursors[targetPage] = null;
+          nextBtn.disabled = true;
+          loadingPage = false;
+          return;
+        }
+
+        const docs = snap.docs;
+        renderFeedDocs(docs, targetPage);
+        if (targetPage === 2 && !pageCursors[1]){
+          newestDocIdOnPageOne = docs[0]?.id || newestDocIdOnPageOne;
+        }
+        updateTotalCount();
+
+        if (snap.size === PAGE_SIZE){
+          pageCursors[targetPage] = docs[docs.length - 1];
+        } else {
+          pageCursors[targetPage] = null;
+        }
+      } catch (err){
+        console.error('Failed to load feed page', err);
+      } finally {
+        loadingPage = false;
+      }
+    }
+
+    loadPage(1, { reset: true, jumpToTop: true });
+
+    nextBtn.addEventListener('click', () => {
+      if (!loadingPage && pageCursors[currentPage]){
+        loadPage(currentPage + 1);
+      }
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (!loadingPage && currentPage > 1){
+        loadPage(currentPage - 1);
+      }
+    });
+
+    function updateCountLabel(){
+      const total = Number.isFinite(totalCount) ? totalCount : 0;
+      countEl.textContent = `Total: ${total} ${total===1?'post':'posts'}`;
+    }
+
+    async function updateTotalCount(){
+      try {
+        const collRef = collection(db, 'feed');
+        const snapshot = await getCountFromServer(collRef);
+        totalCount = snapshot.data().count || 0;
+        updateCountLabel(feedEl.children.length, currentPage);
+      } catch (err){
+        console.error('Failed to fetch total count', err);
+      }
+    }
+
+    updateTotalCount();
+
+    // ===============================
+    // 5) Helper: tiny setup modal
+    // ===============================
+    // setup helper removed
+  </script>
+
+  <!-- Optional: Suggested Firebase Security Rules (dev only) -->
+  <!--
+  // Firestore (VERY OPEN — dev only!)
+  rules_version = '2';
+  service cloud.firestore {
+    match /databases/{database}/documents {
+      match /{document=**} {
+        allow read, write: if true; // dev only — lock down later
+      }
+    }
+  }
+
+  // Storage (dev only!)
+  rules_version = '2';
+  service firebase.storage {
+    match /b/{bucket}/o {
+      match /{allPaths=**} {
+        allow read, write: if true; // dev only — lock later
+      }
+    }
+  }
+  -->
+</body>
+</html>
